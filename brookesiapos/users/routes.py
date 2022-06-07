@@ -1,4 +1,4 @@
-from flask import Response, json
+from flask import Response, json, abort
 
 from . import users_bp
 from brookesiapos.database import db_manager
@@ -10,10 +10,15 @@ def list_users():
     data = db_manager.select_all_from_table('users')
 
     if data == False:
-        return Response(status=500)
+        abort(500)
     else:
         return Response(
-            response=json.dumps({ 'data': data }),
+            response=json.dumps({
+                'response_status': {
+                    'status': 200,
+                },
+                'data': data
+            }),
             status=200,
             content_type='application/json'
         )
@@ -26,11 +31,16 @@ def list_user(item_id):
 
     if data:
         return Response(
-            response=json.dumps({ 'data': data }),
+            response=json.dumps({
+                'response_status': {
+                    'status': 200,
+                },
+                'data': data
+            }),
             status=200,
             content_type='application/json'
         )
     elif data == False:
-        return Response(status=500)
+        abort(500)
     else:
-        return Response(status=404)
+        abort(404)

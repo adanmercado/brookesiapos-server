@@ -44,3 +44,27 @@ def select_one_from_table(table_name, item_id):
         if conn:
             cursor.close()
             conn.close()
+
+        
+def insert_into_table(table_name, data_dict):
+    conn = connection.create_connection()
+
+    data = dict(data_dict)
+
+    columns = ','.join(data.keys())
+    placeholders = ','.join(['%s'] * len(data))
+    values = data.values()
+
+    sql_query = f'INSERT INTO {table_name}({columns}) VALUES({placeholders})'
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute(sql_query)
+        return data
+    except sqlite3.Error as e:
+        print(f'Error at insert_into_table(table_name, data_dict): {str(e)}')
+        return False
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()

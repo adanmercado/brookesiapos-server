@@ -1,4 +1,14 @@
-from flask import Response
+from flask import Response, json
 
-def not_found(e):
-    return Response(status=404)
+def generic_error_handler(e):
+    return Response(
+        response=json.dumps({
+            'response_status': {
+                'status': e.code,
+                'message': e.name #e.description
+            },
+            'data': []
+        }),
+        status=e.code,
+        content_type='application/json'
+    )
