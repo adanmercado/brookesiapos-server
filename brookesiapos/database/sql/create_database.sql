@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
     address TEXT DEFAULT NULL,
     phone TEXT DEFAULT NULL,
     email TEXT DEFAULT NULL,
-    username TEXT NOT NULL,
+    username TEXT UNIQUE NOT NULL,
     password BLOB NOT NULL,
     role INTEGER NOT NULL,
     picture BLOB DEFAULT NULL,
