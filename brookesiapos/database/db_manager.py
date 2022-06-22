@@ -3,15 +3,15 @@ import re
 from . import connection
 
 def select_all_from_table(table_name: str):
-    sql_query = f'SELECT * FROM {table_name}'
-    rows = execute_query(sql_query)
+    query = f'SELECT * FROM {table_name}'
+    rows = execute_query(query)
     data = [dict(row) for row in rows]
     return data
 
 
 def select_one_from_table(table_name: str, item_id: int):
-    sql_query = f'SELECT * FROM {table_name} WHERE id = {item_id}'
-    rows = execute_query(sql_query)
+    query = f'SELECT * FROM {table_name} WHERE id = {item_id}'
+    rows = execute_query(query)
     data = [dict(row) for row in rows]
     return data
 
@@ -21,18 +21,27 @@ def insert_into_table(table_name: str, data_dict: dict):
     placeholders = ','.join(['?'] * len(data_dict))
     values = tuple(x for x in data_dict.values())
 
-    sql_query = f'INSERT INTO {table_name}({columns}) VALUES({placeholders})'
+    query = f'INSERT INTO {table_name}({columns}) VALUES({placeholders})'
 
-    inserted_id = execute_query(sql_query, values)
+    inserted_id = execute_query(query, values)
     if inserted_id:
         data_dict['id'] = inserted_id
         return data_dict
-    else:
-        return False
+    return False
+
+def update_item(table_name: str, data_dict: dict, id: int):
+    columns = [f'{column} = ?' for column in data_dict.keys()]
+    columns = ','.join(columns)
+    values = tuple(x for x in data_dict.values())
+    query = f'UPDATE {table_name} SET {columns} WHERE {table_name}.id = {id}'
+
+    if execute_query(query, values):
+        return select_one_from_table(table_name, id)
+    return False
 
 def item_exists(table_name, field, value):
-    sql_query = f'SELECT {field} FROM {table_name} WHERE {field}=\'{value}\''
-    item = execute_query(sql_query)
+    query = f'SELECT {field} FROM {table_name} WHERE {field}=\'{value}\''
+    item = execute_query(query)
     return item
 
 def execute_query(query: str, values: tuple = None):
@@ -55,6 +64,9 @@ def execute_query(query: str, values: tuple = None):
             conn.commit()
             inserted_id = cursor.lastrowid
             return inserted_id
+        elif re.match('UPDATE\s[{}_=\\\'"A-Za-z\s*]+', query) != None:
+            conn.commit()
+            return True
     except sqlite3.Error as e:
         print(f'Error executing query: {str(e)}')
         return False

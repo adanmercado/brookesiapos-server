@@ -30,10 +30,10 @@ def list_users():
         )
 
 
-@users_bp.route(f'{USERS_API_ENDPOINT}/<int:item_id>')
+@users_bp.route(f'{USERS_API_ENDPOINT}/<int:user_id>')
 @http_auth.login_required
-def list_user(item_id):
-    data = db_manager.select_one_from_table('users', item_id)
+def list_user(user_id):
+    data = db_manager.select_one_from_table('users', user_id)
 
     if data:
         return Response(
@@ -51,7 +51,7 @@ def list_user(item_id):
     else:
         abort(404)
 
-@users_bp.route(f'{USERS_API_ENDPOINT}', methods=['POST'])
+@users_bp.route(USERS_API_ENDPOINT, methods=['POST'])
 @http_auth.login_required
 def create_user():
     body = request.get_json()
@@ -101,6 +101,50 @@ def create_user():
             response=json.dumps({
                 'response_status': {
                     'status': 200,
+                },
+                'data': data
+            }),
+            status=200,
+            content_type='application/json'
+        )
+    else:
+        abort(500)
+
+@users_bp.route(f'{USERS_API_ENDPOINT}/<int:user_id>', methods=['PUT'])
+@http_auth.login_required
+def update_user(user_id):
+    body = request.json
+
+    if not body:
+        abort(400)
+
+    filter_fields = ['id', 'username']
+    for field in filter_fields:
+        body.pop(field, None)
+
+    if not body:
+        return Response(
+            response=json.dumps({
+                'response_status': {
+                    'status': 200,
+                    'message': 'There is not content to update.'
+                },
+                'data': []
+            }),
+            status=200,
+            content_type='application/json'
+        )
+
+    if not db_manager.item_exists('users', 'id', user_id):
+        abort(404)
+
+    data = db_manager.update_item('users', body, user_id)
+    if data:
+        return Response(
+            response=json.dumps({
+                'response_status': {
+                    'status': 200,
+                    'message': 'User updated successfully.'
                 },
                 'data': data
             }),
