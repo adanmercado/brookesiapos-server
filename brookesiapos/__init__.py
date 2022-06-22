@@ -12,9 +12,8 @@ if not db_filepath.exists():
 
 app = Flask(__name__)
 app.register_blueprint(users_bp)
-#app.register_error_handler(404, error_handler.not_found)
-app.register_error_handler(400, error_handler.generic_error_handler)
-app.register_error_handler(404, error_handler.generic_error_handler)
+
+generic_codes = [400, 404, 422, 500]
+for generic_code in generic_codes:
+    app.register_error_handler(generic_code, error_handler.generic_error_handler)
 app.register_error_handler(409, error_handler.conflict_error_handler)
-app.register_error_handler(422, error_handler.generic_error_handler)
-app.register_error_handler(500, error_handler.generic_error_handler)

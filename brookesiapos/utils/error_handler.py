@@ -5,7 +5,7 @@ def generic_error_handler(e):
         response=json.dumps({
             'response_status': {
                 'status': e.code,
-                'message': e.name #e.description
+                'message': f'{e.name}: {e.description}'
             },
             'data': []
         }),
@@ -18,7 +18,7 @@ def conflict_error_handler(e):
         response=json.dumps({
             'response_status': {
                 'status': e.code,
-                'message': e.name + ': The request could not be completed because the resource to create already exists, use the PUT method to update it.'
+                'message': f'{e.name}: The request could not be completed because the resource to create already exists, use the PUT method to update it.'
             },
             'data': []
         }),
