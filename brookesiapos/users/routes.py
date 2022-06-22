@@ -101,6 +101,7 @@ def create_user():
             response=json.dumps({
                 'response_status': {
                     'status': 200,
+                    'message': 'User created successfully.'
                 },
                 'data': data
             }),
