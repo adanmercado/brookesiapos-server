@@ -1,4 +1,3 @@
-from crypt import methods
 from flask import Response, json, abort, request
 
 from . import users_bp
@@ -6,7 +5,6 @@ from brookesiapos.database import db_manager
 from brookesiapos.utils.auth import http_auth
 
 #from brookesiapos import users
-from brookesiapos.users import users_bp
 
 USERS_API_ENDPOINT = '/api/users'
 
