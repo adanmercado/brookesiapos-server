@@ -55,15 +55,19 @@ def create_user():
     mandatory_fields = ['name', 'username', 'password', 'role']
 
     if not body:
-        abort(400)
+        abort(400, f'You must provide the following fields in the request body: {mandatory_fields}')
     
+    missing_fields = []
     for field in mandatory_fields:
         if not field in body:
-            abort(400)
+            missing_fields.append(field)
+
+    if missing_fields:
+        abort(400, f'You must provide the following fields in the request body: {missing_fields}')
 
     username = body['username']
     if db_manager.item_exists(TABLE_NAME, 'username', username):
-        abort(409)
+        abort(409, f'The username \'{username}\' is already assigned to a registered user, use the PUT method to update it.')
 
     address = None
     if 'address' in body:
@@ -114,7 +118,7 @@ def update_user(user_id):
     body = request.json
 
     if not body:
-        abort(400)
+        abort(400, 'You must provide the fields to update.')
 
     filter_fields = ['id', 'username']
     for field in filter_fields:

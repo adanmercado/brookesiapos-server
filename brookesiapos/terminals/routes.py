@@ -68,11 +68,11 @@ def list_terminal(terminal_id: int):
 @http_auth.login_required
 def create_terminal():
     body = request.get_json()
+    mandatory_fields = ['terminal_number', 'name', 'uuid']
     
     if not body:
-        abort(400)
+        abort(400, f'You must provide the following fields in the request body: {mandatory_fields}')
 
-    mandatory_fields = ['terminal_number', 'name', 'uuid']
     missing_fields = []
     for field in mandatory_fields:
         if not field in body:
