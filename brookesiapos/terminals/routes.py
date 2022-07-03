@@ -118,3 +118,63 @@ def create_terminal():
         status=200,
         content_type='application/json'
     )
+
+
+@terminals_bp.route(f'{TERMINALS_API_ENDPOINT}/<int:terminal_id>', methods=['PUT'])
+@http_auth.login_required
+def update_terminal(terminal_id: int):
+    body = request.get_json()
+
+    if not body:
+        abort(400, 'You must provide the fields to update.')
+
+    filter_fields = ['id', 'uuid']
+    for field in filter_fields:
+        if field in body:
+            body.pop(field, None)
+
+    if not body:
+        return Response(
+            response=json.dumps({
+                'response_status': {
+                    'status': 200,
+                    'message': 'There is not content to update.'
+                },
+                'data': []
+            }),
+            status=200,
+            content_type='application/json'
+        )
+
+    terminal = db_manager.select_one_from_table(TABLE_NAME, terminal_id)
+    if not terminal:
+        abort(404)
+
+    terminal_number = None
+    if 'terminal_number' in body:
+        terminal_number = body['terminal_number']
+
+    if terminal_number and terminal_number != terminal[0]['terminal_number'] and db_manager.item_exists(TABLE_NAME, 'terminal_number', terminal_number):
+        abort(409, f'The number \'{terminal_number}\' is already assigned to another registered terminal, please specify another terminal number.')
+
+    terminal_name = None
+    if 'name' in body:
+        terminal_name = body['name']
+
+    if terminal_name and terminal_name != terminal[0]['name'] and db_manager.item_exists(TABLE_NAME, 'name', terminal_name):
+        abort(409, f'The name \'{terminal_name}\' is already assigned to another registered terminal, please specify another terminal name.')
+
+    data = db_manager.update_item(TABLE_NAME, body, terminal_id)
+    if not data:
+        abort(500)
+
+    return Response(
+        response=json.dumps({
+            'response_status': {
+                'status': 200
+            },
+            'data': data
+        }),
+        status=200,
+        content_type='applicatio/json'
+    )
