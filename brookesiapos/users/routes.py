@@ -4,14 +4,13 @@ from . import users_bp
 from brookesiapos.database import db_manager
 from brookesiapos.utils.auth import http_auth
 
-#from brookesiapos import users
-
 USERS_API_ENDPOINT = '/api/users'
+TABLE_NAME = 'users'
 
 @users_bp.route(USERS_API_ENDPOINT)
 @http_auth.login_required
 def list_users():
-    data = db_manager.select_all_from_table('users')
+    data = db_manager.select_all_from_table(TABLE_NAME)
 
     if data == False:
         abort(500)
@@ -31,7 +30,7 @@ def list_users():
 @users_bp.route(f'{USERS_API_ENDPOINT}/<int:user_id>')
 @http_auth.login_required
 def list_user(user_id):
-    data = db_manager.select_one_from_table('users', user_id)
+    data = db_manager.select_one_from_table(TABLE_NAME, user_id)
 
     if data:
         return Response(
@@ -63,7 +62,7 @@ def create_user():
             abort(400)
 
     username = body['username']
-    if db_manager.item_exists('users', 'username', username):
+    if db_manager.item_exists(TABLE_NAME, 'username', username):
         abort(409)
 
     address = None
@@ -93,7 +92,7 @@ def create_user():
         'picture': picture
     }
 
-    data = db_manager.insert_into_table('users', user)
+    data = db_manager.insert_into_table(TABLE_NAME, user)
     if data:
         return Response(
             response=json.dumps({
@@ -134,10 +133,10 @@ def update_user(user_id):
             content_type='application/json'
         )
 
-    if not db_manager.item_exists('users', 'id', user_id):
+    if not db_manager.item_exists(TABLE_NAME, 'id', user_id):
         abort(404)
 
-    data = db_manager.update_item('users', body, user_id)
+    data = db_manager.update_item(TABLE_NAME, body, user_id)
     if data:
         return Response(
             response=json.dumps({
