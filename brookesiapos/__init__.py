@@ -20,7 +20,6 @@ app.register_blueprint(users_bp)
 app.register_blueprint(roles_bp)
 app.register_blueprint(terminals_bp)
 
-generic_codes = [400, 404, 422, 500]
+generic_codes = [400, 404, 409, 422, 500]
 for generic_code in generic_codes:
     app.register_error_handler(generic_code, error_handler.generic_error_handler)
-app.register_error_handler(409, error_handler.conflict_error_handler)

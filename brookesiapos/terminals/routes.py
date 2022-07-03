@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from flask import Response, request, json, abort
 
 from . import terminals_bp
@@ -6,6 +8,21 @@ from brookesiapos.utils.auth import http_auth
 
 TERMINALS_API_ENDPOINT = '/api/terminals'
 TABLE_NAME = 'terminals'
+
+@terminals_bp.route('/api/uuid')
+def create_uuid():
+    return Response(
+        response=json.dumps({
+            'response_status': {
+                'status': 200
+            },
+            'data': {
+                'uuid': str(uuid4())
+            }
+        }),
+        status=200,
+        content_type='application/json'
+    )
 
 @terminals_bp.route(TERMINALS_API_ENDPOINT)
 @http_auth.login_required
@@ -46,3 +63,58 @@ def list_terminal(terminal_id: int):
         abort(500)
     else:
         abort(404)
+
+@terminals_bp.route(TERMINALS_API_ENDPOINT, methods=['POST'])
+@http_auth.login_required
+def create_terminal():
+    body = request.get_json()
+    
+    if not body:
+        abort(400)
+
+    mandatory_fields = ['terminal_number', 'name', 'uuid']
+    missing_fields = []
+    for field in mandatory_fields:
+        if not field in body:
+            missing_fields.append(field)
+
+    if missing_fields:
+        abort(400, f'You must provide the following fields in the request body: {missing_fields}')
+
+    terminal_number = body['terminal_number']
+    if db_manager.item_exists(TABLE_NAME, 'terminal_number', terminal_number):
+        abort(409, f'The number \'{terminal_number}\' is already assigned to a registered terminal, use the PUT method to update it.')
+
+    terminal_name = body['name']
+    if db_manager.item_exists(TABLE_NAME, 'name', terminal_name):
+        abort(409, f'The name \'{terminal_name}\' is already assigned to a registered terminal, use the PUT method to update it.')
+
+    terminal_uuid = body['uuid']
+    if db_manager.item_exists(TABLE_NAME, 'uuid', terminal_uuid):
+        abort(409, f'The UUID \'{terminal_uuid}\' is already assigned to a registered terminal, use the PUT method to update it.')
+
+    last_ip = None
+    if 'last_ip' in body:
+        last_ip = body['last_ip']
+
+    terminal = {
+        'terminal_number': terminal_number,
+        'name': terminal_name,
+        'uuid': terminal_uuid,
+        'last_ip': last_ip
+    }
+
+    data = db_manager.insert_into_table(TABLE_NAME, terminal)
+    if not data:
+        abort(500)
+
+    return Response(
+        response=json.dumps({
+            'response_status': {
+                'status': 200
+            },
+            'data': data
+        }),
+        status=200,
+        content_type='application/json'
+    )
