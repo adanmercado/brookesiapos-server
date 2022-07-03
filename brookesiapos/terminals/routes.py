@@ -25,3 +25,24 @@ def list_terminals():
             status=200,
             content_type='application/json'
         )
+
+@terminals_bp.route(f'{TERMINALS_API_ENDPOINT}/<int:terminal_id>')
+@http_auth.login_required
+def list_terminal(terminal_id: int):
+    data = db_manager.select_one_from_table(TABLE_NAME, terminal_id)
+
+    if data:
+        return Response(
+            response=json.dumps({
+                'response_status': {
+                    'status': 200
+                },
+                'data': data
+            }),
+            status=200,
+            content_type='application/json'
+        )
+    elif data == False:
+        abort(500)
+    else:
+        abort(404)
