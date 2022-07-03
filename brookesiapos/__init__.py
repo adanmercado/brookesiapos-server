@@ -3,8 +3,11 @@ import sys
 from flask import Flask
 
 from .database.connection import db_filepath
+
 from .users import users_bp
 from .roles import roles_bp
+from .terminals import terminals_bp
+
 from .utils import error_handler
 
 if not db_filepath.exists():
@@ -12,8 +15,10 @@ if not db_filepath.exists():
     sys.exit(0)
 
 app = Flask(__name__)
+
 app.register_blueprint(users_bp)
 app.register_blueprint(roles_bp)
+app.register_blueprint(terminals_bp)
 
 generic_codes = [400, 404, 422, 500]
 for generic_code in generic_codes:
