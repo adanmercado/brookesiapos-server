@@ -10,7 +10,11 @@ def select_all_from_table(table_name: str):
 
 
 def select_one_from_table(table_name: str, item_id: int):
-    query = f'SELECT * FROM {table_name} WHERE id = {item_id}'
+    return select_item_from_table(table_name, 'id', item_id)
+
+
+def select_item_from_table(table_name: str, field: str, value):
+    query = f'SELECT * FROM {table_name} WHERE {field} = \'{value}\''
     rows = execute_query(query)
     data = [dict(row) for row in rows]
     return data

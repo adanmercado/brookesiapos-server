@@ -29,7 +29,7 @@ def list_users():
 
 @users_bp.route(f'{USERS_API_ENDPOINT}/<int:user_id>')
 @http_auth.login_required
-def list_user(user_id):
+def list_user(user_id: int):
     data = db_manager.select_one_from_table(TABLE_NAME, user_id)
 
     if data:
@@ -47,6 +47,46 @@ def list_user(user_id):
         abort(500)
     else:
         abort(404)
+
+@users_bp.route(f'{USERS_API_ENDPOINT}/auth', methods=['POST'])
+def validate_user():
+    body = request.get_json()
+    mandatory_fields = ['username', 'password']
+
+    if not body:
+        abort(400, f'You must provide the following fields in the request body: {mandatory_fields}')
+    
+    missing_fields = []
+    for field in mandatory_fields:
+        if not field in body:
+            missing_fields.append(field)
+
+    if missing_fields:
+        abort(400, f'You must provide the following fields in the request body: {missing_fields}')
+    
+
+    data = db_manager.select_item_from_table(TABLE_NAME, 'username', body['username'])
+    if data:
+        status_code = 200
+        if data[0]['password'] != body['password']:
+            data = []
+            status_code = 201
+
+        return Response(
+                response=json.dumps({
+                    'response_status': {
+                        'status': status_code,
+                    },
+                    'data': data
+                }),
+                status=status_code,
+                content_type='application/json'
+            )
+    elif data == False:
+        abort(500)
+    else:
+        abort(404, 'User not found')
+
 
 @users_bp.route(USERS_API_ENDPOINT, methods=['POST'])
 @http_auth.login_required
