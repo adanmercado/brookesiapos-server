@@ -7,6 +7,7 @@ from .database.connection import db_filepath
 from .users import users_bp
 from .roles import roles_bp
 from .terminals import terminals_bp
+from .customers import customers_bp
 
 from .utils import error_handler
 
@@ -19,6 +20,7 @@ app = Flask(__name__)
 app.register_blueprint(users_bp)
 app.register_blueprint(roles_bp)
 app.register_blueprint(terminals_bp)
+app.register_blueprint(customers_bp)
 
 generic_codes = [400, 404, 409, 422, 500]
 for generic_code in generic_codes:

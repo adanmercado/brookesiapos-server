@@ -10,7 +10,7 @@ INSERT INTO user_roles(name) VALUES('Administrator'), ('Supervisor'), ('Cashier'
 INSERT INTO users(name, username, password, role) VALUES('Brookesia POS Administrator', 'brookesia', '24b4699ff6e696904210b8243142e5705d38b3a8a8f5ea34d09ae222a634a412', 1);
 
 
-INSERT INTO clients(name) VALUES('General');
+INSERT INTO customers(name) VALUES('General');
 
 
 INSERT INTO providers(name) VALUES('General');
