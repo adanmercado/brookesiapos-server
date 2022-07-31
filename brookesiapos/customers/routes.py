@@ -55,11 +55,11 @@ def create_customer():
 
     phone = None
     if 'phone' in body:
-        address = body['phone']
+        phone = body['phone']
 
     email = None
     if 'email' in body:
-        address = body['email']
+        email = body['email']
 
     customer = {
         'name': name,
