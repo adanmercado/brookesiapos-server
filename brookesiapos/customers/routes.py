@@ -39,7 +39,7 @@ def create_customer():
 
     missing_fields = []
     for field in mandatory_fields:
-        if not field in body:
+        if not field in body or not body[field]:
             missing_fields.append(field)
 
     if missing_fields:
@@ -75,6 +75,51 @@ def create_customer():
                 'response_status': {
                     'status': 200,
                     'message': 'Customer created successfully.'
+                },
+                'data': data
+            }),
+            status=200,
+            content_type='application/json'
+        )
+    else:
+        abort(500)
+
+
+@customers_bp.route(f'{CUSTOMERS_API_ENDPOINT}/<int:id>', methods=['PUT'])
+@http_auth.login_required
+def update_customer(id: int):
+    body = request.json
+
+    if not body:
+        abort(400, 'You must provide the fields to update.')
+
+    filter_fields = ['id']
+    for field in filter_fields:
+        body.pop(field, None)
+
+    if not body:
+        return Response(
+            response=json.dumps({
+                'response_status': {
+                    'status': 200,
+                    'message': 'There is not content to update.'
+                },
+                'data': []
+            }),
+            status=200,
+            content_type='application/json'
+        )
+
+    if not db_manager.item_exists(TABLE_NAME, 'id', id):
+        abort(404)
+
+    data = db_manager.update_item(TABLE_NAME, body, id)
+    if data:
+        return Response(
+            response=json.dumps({
+                'response_status': {
+                    'status': 200,
+                    'message': 'Customer updated successfully.'
                 },
                 'data': data
             }),
