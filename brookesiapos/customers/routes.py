@@ -26,3 +26,60 @@ def list_customers():
             status=200,
             content_type='application/json'
         )
+
+
+@customers_bp.route(CUSTOMERS_API_ENDPOINT, methods=['POST'])
+@http_auth.login_required
+def create_customer():
+    body = request.get_json()
+    mandatory_fields = ['name']
+    
+    if not body:
+        abort(400, f'You must provide the following fields in the request body: {mandatory_fields}')
+
+    missing_fields = []
+    for field in mandatory_fields:
+        if not field in body:
+            missing_fields.append(field)
+
+    if missing_fields:
+        abort(400, f'You must provide the following fields in the request body: {missing_fields}')
+
+    name = body['name']
+    if db_manager.item_exists(TABLE_NAME, 'name', name):
+        abort(409, f'The name \'{name}\' is already assigned to a registered customer, use the PUT method to update it.')
+
+    address = None
+    if 'address' in body:
+        address = body['address']
+
+    phone = None
+    if 'phone' in body:
+        address = body['phone']
+
+    email = None
+    if 'email' in body:
+        address = body['email']
+
+    customer = {
+        'name': name,
+        'address': address,
+        'phone': phone,
+        'email': email
+    }
+
+    data = db_manager.insert_into_table(TABLE_NAME, customer)
+    if data:
+        return Response(
+            response=json.dumps({
+                'response_status': {
+                    'status': 200,
+                    'message': 'Customer created successfully.'
+                },
+                'data': data
+            }),
+            status=200,
+            content_type='application/json'
+        )
+    else:
+        abort(500)
