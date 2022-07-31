@@ -48,6 +48,10 @@ def item_exists(table_name, field, value):
     item = execute_query(query)
     return item
 
+def delete_item(table_name: str, id: int):
+    query = f'DELETE FROM {table_name} WHERE {table_name}.id = {id}'
+    return execute_query(query)
+
 def execute_query(query: str, values: tuple = None):
     conn = connection.create_connection()
 
@@ -64,11 +68,11 @@ def execute_query(query: str, values: tuple = None):
         if re.match('SELECT\s[{}_=\\\'"A-Za-z\s*]+', query) != None:
             data = cursor.fetchall()
             return data
-        elif re.match('INSERT\s[{}_=\\\'"A-Za-z\s*]+', query) != None:
+        elif re.match('INSERT\s[{}_=\\\'"A-Za-z\s]+', query) != None:
             conn.commit()
             inserted_id = cursor.lastrowid
             return inserted_id
-        elif re.match('UPDATE\s[{}_=\\\'"A-Za-z\s*]+', query) != None:
+        elif re.match('(UPDATE|DELETE)\s[{}_=\\\'"A-Za-z\s]+', query) != None:
             conn.commit()
             return True
     except sqlite3.Error as e:

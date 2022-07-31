@@ -128,3 +128,25 @@ def update_customer(id: int):
         )
     else:
         abort(500)
+
+
+@customers_bp.route(f'{CUSTOMERS_API_ENDPOINT}/<int:id>', methods=['DELETE'])
+@http_auth.login_required
+def delete_customer(id: int):
+    if not db_manager.item_exists(TABLE_NAME, 'id', id):
+        abort(404)
+
+    if not db_manager.delete_item(TABLE_NAME, id):
+        abort(500)
+
+    return Response(
+        response=json.dumps({
+            'response_status': {
+                'status': 200,
+                'message': 'Customer removed successfully.'
+            },
+            'data': []
+        }),
+        status=200,
+        content_type='application/json'
+    )
